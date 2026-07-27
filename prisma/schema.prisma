@@ -1,0 +1,82 @@
+// Gym Tracker PWA - Prisma schema
+// NOTE: using SQLite for local/dev convenience. Swap provider to "postgresql"
+// and DATABASE_URL to a Postgres connection string for production (see doc).
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  name      String?
+  routines  Routine[]
+  workouts  Workout[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Exercise {
+  id            String        @id @default(uuid())
+  name          String
+  category      String
+  equipment     String?
+  videoUrl      String?
+  instructions  String?
+  workoutSets   WorkoutSet[]
+  routineItems  RoutineItem[]
+  createdAt     DateTime      @default(now())
+}
+
+model Routine {
+  id          String        @id @default(uuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  items       RoutineItem[]
+  workouts    Workout[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model RoutineItem {
+  id         String   @id @default(uuid())
+  routineId  String
+  routine    Routine  @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  exerciseId String
+  exercise   Exercise @relation(fields: [exerciseId], references: [id])
+  targetSets Int      @default(3)
+  order      Int      @default(0)
+}
+
+model Workout {
+  id        String       @id @default(uuid())
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  routineId String?
+  routine   Routine?     @relation(fields: [routineId], references: [id])
+  name      String
+  startTime DateTime     @default(now())
+  endTime   DateTime?
+  sets      WorkoutSet[]
+  notes     String?
+}
+
+model WorkoutSet {
+  id         String   @id @default(uuid())
+  workoutId  String
+  workout    Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  exerciseId String
+  exercise   Exercise @relation(fields: [exerciseId], references: [id])
+  weight     Float
+  reps       Int
+  rpe        Float?
+  completed  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+}
