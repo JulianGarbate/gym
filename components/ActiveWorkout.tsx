@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import type { Exercise, WorkoutSet } from "@prisma/client";
 import {
+  ArrowLeft,
   CheckCircle2,
   ChevronDown,
   Copy,
@@ -357,6 +359,16 @@ export default function ActiveWorkout({
             </SubmitButton>
           </form>
         </div>
+      )}
+
+      {isFinished && (
+        <Link
+          href={`/workout/${workoutId}/summary`}
+          className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl border border-border font-semibold text-foreground transition-colors active:bg-surface"
+        >
+          <ArrowLeft size={17} />
+          Ver resumen
+        </Link>
       )}
 
       <RestTimer />

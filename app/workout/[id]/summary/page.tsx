@@ -1,10 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Clock, Dumbbell, Flame, Home, Trophy } from "lucide-react";
+import { Clock, Dumbbell, Flame, Home, Pencil, Trophy } from "lucide-react";
 import { getCurrentUser } from "@/lib/session";
 import { estimateCaloriesBurned } from "@/lib/calories";
 import SendToDailyCalButton from "@/components/SendToDailyCalButton";
+import DeleteWorkoutButton from "@/components/DeleteWorkoutButton";
 
 export default async function WorkoutSummaryPage({
   params,
@@ -86,6 +87,17 @@ export default async function WorkoutSummaryPage({
 
   return (
     <div className="px-5 pb-24 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
+      <div className="mb-3 flex items-center justify-end gap-2">
+        <Link
+          href={`/workout/${workout.id}`}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-muted transition-colors active:bg-surface-2"
+          aria-label="Editar entrenamiento"
+          title="Editar entrenamiento"
+        >
+          <Pencil size={16} />
+        </Link>
+        <DeleteWorkoutButton workoutId={workout.id} />
+      </div>
       <div className="mb-6 text-center">
         <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 text-accent">
           <Trophy size={30} />
