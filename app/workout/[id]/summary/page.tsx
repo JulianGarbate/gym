@@ -1,7 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Clock, Dumbbell, Home, Trophy } from "lucide-react";
+import { Clock, Dumbbell, Flame, Home, Trophy } from "lucide-react";
+import { getCurrentUser } from "@/lib/session";
+import { estimateCaloriesBurned } from "@/lib/calories";
+import SendToDailyCalButton from "@/components/SendToDailyCalButton";
 
 export default async function WorkoutSummaryPage({
   params,
@@ -10,12 +13,15 @@ export default async function WorkoutSummaryPage({
 }) {
   const { id } = await params;
 
-  const workout = await prisma.workout.findUnique({
-    where: { id },
-    include: {
-      sets: { include: { exercise: true }, orderBy: { createdAt: "asc" } },
-    },
-  });
+  const [workout, user] = await Promise.all([
+    prisma.workout.findUnique({
+      where: { id },
+      include: {
+        sets: { include: { exercise: true }, orderBy: { createdAt: "asc" } },
+      },
+    }),
+    getCurrentUser(),
+  ]);
 
   if (!workout) notFound();
 
@@ -28,6 +34,10 @@ export default async function WorkoutSummaryPage({
     (sum, s) => sum + s.weight * s.reps,
     0
   );
+
+  const calories = user.weightKg
+    ? estimateCaloriesBurned(user.weightKg, durationMin)
+    : null;
 
   const exerciseIds = Array.from(new Set(workout.sets.map((s) => s.exerciseId)));
 
@@ -86,7 +96,7 @@ export default async function WorkoutSummaryPage({
         <p className="mt-1 text-sm text-muted">Entrenamiento completado</p>
       </div>
 
-      <div className="mb-6 grid grid-cols-3 gap-2.5">
+      <div className="mb-3 grid grid-cols-3 gap-2.5">
         <div className="rounded-2xl border border-border bg-surface p-3 text-center">
           <Clock className="mx-auto mb-1 text-accent" size={18} />
           <p className="text-lg font-bold text-foreground">{durationMin}</p>
@@ -105,6 +115,34 @@ export default async function WorkoutSummaryPage({
           <p className="text-xs text-muted">PRs</p>
         </div>
       </div>
+
+      {calories !== null ? (
+        <div className="mb-6 flex items-center gap-3 rounded-2xl border border-border bg-surface p-4">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent">
+            <Flame size={20} />
+          </div>
+          <div className="flex-1">
+            <p className="text-lg font-bold text-foreground">
+              ~{calories} kcal
+            </p>
+            <p className="text-xs text-muted">
+              Estimado según tu peso y la duración
+            </p>
+          </div>
+          <SendToDailyCalButton calories={calories} />
+        </div>
+      ) : (
+        <Link
+          href="/profile"
+          className="mb-6 block rounded-2xl border border-dashed border-border p-4 text-center transition-colors active:bg-surface"
+        >
+          <p className="text-sm text-muted">
+            Cargá tu peso en{" "}
+            <span className="font-medium text-accent">tu perfil</span> para
+            ver las calorías estimadas de este entrenamiento
+          </p>
+        </Link>
+      )}
 
       <div className="space-y-2.5">
         {exerciseSummaries.map((e) => (

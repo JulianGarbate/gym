@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN "age" INTEGER;
+ALTER TABLE "User" ADD COLUMN "heightCm" REAL;
+ALTER TABLE "User" ADD COLUMN "sex" TEXT;
+ALTER TABLE "User" ADD COLUMN "weightKg" REAL;

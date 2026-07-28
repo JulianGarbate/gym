@@ -2,7 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import PageHeader from "@/components/PageHeader";
-import { ArrowRight, Dumbbell, ListChecks, Play } from "lucide-react";
+import { ArrowRight, Dumbbell, ListChecks, Play, User } from "lucide-react";
 
 export default async function Home() {
   const user = await getCurrentUser();
@@ -16,7 +16,18 @@ export default async function Home() {
 
   return (
     <div>
-      <PageHeader title="Gym Tracker" />
+      <PageHeader
+        title="Gym Tracker"
+        action={
+          <Link
+            href="/profile"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface text-muted transition-colors active:bg-surface-2"
+            aria-label="Mi perfil"
+          >
+            <User size={18} />
+          </Link>
+        }
+      />
       <div className="px-5 py-5 space-y-5">
         <Link
           href="/workout"
