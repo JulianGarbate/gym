@@ -28,10 +28,8 @@ export default function BottomNav() {
               >
                 <Icon
                   size={26}
-                  strokeWidth={active ? 2.25 : 1.75}
-                  fill={active ? "currentColor" : "none"}
-                  fillOpacity={active ? 0.12 : 0}
-                  className={`transition-all duration-150 active:scale-90 ${
+                  strokeWidth={active ? 2.3 : 1.75}
+                  className={`shrink-0 transition-transform duration-150 active:scale-90 ${
                     active ? "text-foreground" : "text-muted"
                   }`}
                 />
