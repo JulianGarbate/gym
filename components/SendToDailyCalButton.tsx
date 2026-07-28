@@ -2,11 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { AlertTriangle, Check, Loader2, Send } from "lucide-react";
-import { sendCaloriesToDailyCal } from "@/app/actions/dailyCal";
+import { syncWorkoutToDailyCal } from "@/app/actions/dailyCal";
 
 export default function SendToDailyCalButton({
+  workoutId,
   calories,
 }: {
+  workoutId: string;
   calories: number;
 }) {
   const [status, setStatus] = useState<"idle" | "sent" | "error">("idle");
@@ -15,7 +17,7 @@ export default function SendToDailyCalButton({
 
   function handleClick() {
     startTransition(async () => {
-      const result = await sendCaloriesToDailyCal(calories);
+      const result = await syncWorkoutToDailyCal(workoutId, calories);
       if (result.ok) {
         setStatus("sent");
       } else {
@@ -29,7 +31,7 @@ export default function SendToDailyCalButton({
     return (
       <span className="flex h-11 shrink-0 items-center gap-1.5 rounded-full bg-surface-2 px-3.5 text-sm font-semibold text-muted">
         <Check size={16} />
-        Enviado
+        Sincronizado
       </span>
     );
   }
@@ -40,8 +42,8 @@ export default function SendToDailyCalButton({
       disabled={pending}
       title={
         status === "error"
-          ? error ?? "Error al enviar"
-          : `Enviar ${calories} kcal a Daily Cal`
+          ? (error ?? "Error al enviar")
+          : `Sincronizar ${calories} kcal con Daily Cal`
       }
       className={`flex h-11 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm font-semibold transition-colors disabled:opacity-60 ${
         status === "error"

@@ -126,10 +126,10 @@ export default async function WorkoutSummaryPage({
               ~{calories} kcal
             </p>
             <p className="text-xs text-muted">
-              Estimado según tu peso y la duración
+              Se sincroniza con Daily Cal automáticamente
             </p>
           </div>
-          <SendToDailyCalButton calories={calories} />
+          <SendToDailyCalButton workoutId={workout.id} calories={calories} />
         </div>
       ) : (
         <Link

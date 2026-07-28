@@ -2,6 +2,8 @@
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { estimateCaloriesBurned } from "@/lib/calories";
+import { syncWorkoutToDailyCal } from "@/app/actions/dailyCal";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -67,10 +69,29 @@ export async function updateWorkoutNotes(workoutId: string, notes: string) {
 }
 
 export async function finishWorkout(workoutId: string) {
-  await prisma.workout.update({
+  const workout = await prisma.workout.update({
     where: { id: workoutId },
     data: { endTime: new Date() },
+    include: { user: true },
   });
+
+  // Best-effort: syncing to Daily Cal should never block finishing the
+  // workout in this app, so any failure here is swallowed.
+  try {
+    if (workout.user.weightKg) {
+      const durationMin = Math.max(
+        1,
+        Math.round(
+          (workout.endTime!.getTime() - workout.startTime.getTime()) / 60000
+        )
+      );
+      const calories = estimateCaloriesBurned(workout.user.weightKg, durationMin);
+      await syncWorkoutToDailyCal(workout.id, calories, workout.startTime.toISOString());
+    }
+  } catch (err) {
+    console.error("Daily Cal sync failed on finishWorkout", err);
+  }
+
   revalidatePath(`/workout/${workoutId}`);
   redirect(`/workout/${workoutId}/summary`);
 }
