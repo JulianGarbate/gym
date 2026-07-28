@@ -69,6 +69,7 @@ export async function logSet(
   });
   await resyncDailyCalIfFinished(workoutId);
   revalidatePath(`/workout/${workoutId}`);
+  revalidatePath("/");
 }
 
 export async function updateSet(
@@ -85,12 +86,14 @@ export async function updateSet(
   });
   await resyncDailyCalIfFinished(workoutId);
   revalidatePath(`/workout/${workoutId}`);
+  revalidatePath("/");
 }
 
 export async function deleteSet(workoutId: string, setId: string) {
   await prisma.workoutSet.delete({ where: { id: setId } });
   await resyncDailyCalIfFinished(workoutId);
   revalidatePath(`/workout/${workoutId}`);
+  revalidatePath("/");
 }
 
 export async function updateWorkoutNotes(workoutId: string, notes: string) {
@@ -126,6 +129,7 @@ export async function finishWorkout(workoutId: string) {
   }
 
   revalidatePath(`/workout/${workoutId}`);
+  revalidatePath("/");
   redirect(`/workout/${workoutId}/summary`);
 }
 
