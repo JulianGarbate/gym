@@ -20,7 +20,7 @@ async function main() {
   );
   const exercises: RawExercise[] = await res.json();
 
-  for (const ex of exercises.slice(0, 100)) {
+  for (const ex of exercises) {
     await prisma.exercise.upsert({
       where: { id: ex.id },
       update: {},
