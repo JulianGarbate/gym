@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import type { Exercise } from "@prisma/client";
-import { ChevronLeft, Plus, Search, X } from "lucide-react";
+import { ChevronLeft, Loader2, Plus, Search, X } from "lucide-react";
 import { addRoutineItem } from "@/app/actions/routines";
 
 export default function AddExerciseToRoutine({
@@ -169,8 +169,17 @@ export default function AddExerciseToRoutine({
                   disabled={pending}
                   className="flex min-h-[50px] w-full items-center justify-center gap-2 rounded-2xl bg-accent font-semibold text-accent-foreground transition-transform active:scale-[0.98] disabled:opacity-50"
                 >
-                  <Plus size={19} />
-                  Agregar a la rutina
+                  {pending ? (
+                    <>
+                      <Loader2 size={19} className="animate-spin" />
+                      Agregando...
+                    </>
+                  ) : (
+                    <>
+                      <Plus size={19} />
+                      Agregar a la rutina
+                    </>
+                  )}
                 </button>
               </div>
             )}

@@ -8,6 +8,8 @@ import {
 import AddExerciseToRoutine from "@/components/AddExerciseToRoutine";
 import StartWorkoutButton from "@/components/StartWorkoutButton";
 import ExerciseDetailModal from "@/components/ExerciseDetailModal";
+import DeleteRoutineButton from "@/components/DeleteRoutineButton";
+import SubmitButton from "@/components/SubmitButton";
 import { ChevronDown, ChevronUp, Copy, Info, Trash2 } from "lucide-react";
 
 export default async function RoutineDetailPage({
@@ -44,16 +46,17 @@ export default async function RoutineDetailPage({
             <p className="mt-1 text-sm text-muted">{routine.description}</p>
           )}
         </div>
-        <form action={duplicateRoutine.bind(null, routine.id)}>
-          <button
-            type="submit"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-muted active:bg-surface-2"
-            aria-label="Duplicar rutina"
-            title="Duplicar rutina"
-          >
-            <Copy size={16} />
-          </button>
-        </form>
+        <div className="flex shrink-0 items-center gap-2">
+          <form action={duplicateRoutine.bind(null, routine.id)}>
+            <SubmitButton
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-muted active:bg-surface-2"
+              ariaLabel="Duplicar rutina"
+            >
+              <Copy size={16} />
+            </SubmitButton>
+          </form>
+          <DeleteRoutineButton routineId={routine.id} />
+        </div>
       </div>
       <div className="h-4" />
 
@@ -87,36 +90,39 @@ export default async function RoutineDetailPage({
             />
             <div className="flex shrink-0 flex-col">
               <form action={moveRoutineItem.bind(null, routine.id, item.id, "up")}>
-                <button
-                  type="submit"
+                <SubmitButton
                   disabled={i === 0}
                   className="flex h-6 w-8 items-center justify-center text-muted disabled:opacity-20"
-                  aria-label="Subir"
+                  ariaLabel="Subir"
+                  pendingChildren={
+                    <span className="block h-3.5 w-3.5 animate-spin rounded-full border-2 border-muted border-t-transparent" />
+                  }
                 >
                   <ChevronUp size={16} />
-                </button>
+                </SubmitButton>
               </form>
               <form
                 action={moveRoutineItem.bind(null, routine.id, item.id, "down")}
               >
-                <button
-                  type="submit"
+                <SubmitButton
                   disabled={i === routine.items.length - 1}
                   className="flex h-6 w-8 items-center justify-center text-muted disabled:opacity-20"
-                  aria-label="Bajar"
+                  ariaLabel="Bajar"
+                  pendingChildren={
+                    <span className="block h-3.5 w-3.5 animate-spin rounded-full border-2 border-muted border-t-transparent" />
+                  }
                 >
                   <ChevronDown size={16} />
-                </button>
+                </SubmitButton>
               </form>
             </div>
             <form action={removeRoutineItem.bind(null, routine.id, item.id)}>
-              <button
-                type="submit"
+              <SubmitButton
                 className="flex h-10 w-10 items-center justify-center rounded-full text-muted transition-colors active:bg-surface-2 active:text-foreground"
-                aria-label="Quitar ejercicio"
+                ariaLabel="Quitar ejercicio"
               >
                 <Trash2 size={17} />
-              </button>
+              </SubmitButton>
             </form>
           </div>
         ))}

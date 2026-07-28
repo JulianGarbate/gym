@@ -1,7 +1,8 @@
 import { getCurrentUser } from "@/lib/session";
 import PageHeader from "@/components/PageHeader";
 import { updateProfile } from "@/app/actions/profile";
-import { Save } from "lucide-react";
+import SubmitButton from "@/components/SubmitButton";
+import { Check, Loader2, Save } from "lucide-react";
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
@@ -88,13 +89,25 @@ export default async function ProfilePage() {
           entrenamiento. Podés editar estos datos cuando quieras.
         </p>
 
-        <button
-          type="submit"
-          className="flex min-h-[50px] w-full items-center justify-center gap-2 rounded-2xl bg-accent font-semibold text-accent-foreground transition-transform active:scale-[0.98]"
+        <SubmitButton
+          className="flex min-h-[50px] w-full items-center justify-center gap-2 rounded-2xl bg-accent font-semibold text-accent-foreground transition-transform active:scale-[0.98] disabled:opacity-60"
+          showDoneFlash
+          pendingChildren={
+            <>
+              <Loader2 size={18} className="animate-spin" />
+              Guardando...
+            </>
+          }
+          doneChildren={
+            <>
+              <Check size={18} />
+              Guardado
+            </>
+          }
         >
           <Save size={18} />
           Guardar
-        </button>
+        </SubmitButton>
       </form>
     </div>
   );

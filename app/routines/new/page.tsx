@@ -1,5 +1,7 @@
 import PageHeader from "@/components/PageHeader";
 import { createRoutine } from "@/app/actions/routines";
+import SubmitButton from "@/components/SubmitButton";
+import { Loader2, Plus } from "lucide-react";
 
 export default function NewRoutinePage() {
   return (
@@ -28,12 +30,18 @@ export default function NewRoutinePage() {
             className="w-full rounded-2xl border border-border bg-surface px-4 py-3 text-base text-foreground outline-none transition-colors focus:border-accent/60 focus:ring-2 focus:ring-accent/20"
           />
         </div>
-        <button
-          type="submit"
-          className="min-h-[50px] w-full rounded-2xl bg-accent font-semibold text-accent-foreground transition-transform active:scale-[0.98]"
+        <SubmitButton
+          className="flex min-h-[50px] w-full items-center justify-center gap-2 rounded-2xl bg-accent font-semibold text-accent-foreground transition-transform active:scale-[0.98] disabled:opacity-60"
+          pendingChildren={
+            <>
+              <Loader2 size={18} className="animate-spin" />
+              Creando...
+            </>
+          }
         >
+          <Plus size={18} />
           Crear rutina
-        </button>
+        </SubmitButton>
       </form>
     </div>
   );

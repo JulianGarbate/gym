@@ -8,6 +8,7 @@ import {
   Copy,
   Flag,
   Info,
+  Loader2,
   Pencil,
   Plus,
   Trash2,
@@ -22,6 +23,7 @@ import {
 } from "@/app/actions/workouts";
 import RestTimer from "@/components/RestTimer";
 import ExerciseDetailModal from "@/components/ExerciseDetailModal";
+import SubmitButton from "@/components/SubmitButton";
 
 type LoggedSet = WorkoutSet & { exercise: Exercise };
 
@@ -50,6 +52,9 @@ export default function ActiveWorkout({
   const [editingSetId, setEditingSetId] = useState<string | null>(null);
   const [showNotes, setShowNotes] = useState(!!initialNotes);
   const [notes, setNotes] = useState(initialNotes ?? "");
+  const [notesStatus, setNotesStatus] = useState<"idle" | "saving" | "saved">(
+    "idle"
+  );
   const [pending, startTransition] = useTransition();
 
   const activeExercise = exercises.find((e) => e.id === activeExerciseId);
@@ -102,7 +107,12 @@ export default function ActiveWorkout({
   }
 
   function handleSaveNotes() {
-    startTransition(() => updateWorkoutNotes(workoutId, notes));
+    setNotesStatus("saving");
+    startTransition(async () => {
+      await updateWorkoutNotes(workoutId, notes);
+      setNotesStatus("saved");
+      setTimeout(() => setNotesStatus("idle"), 1500);
+    });
   }
 
   return (
@@ -217,7 +227,11 @@ export default function ActiveWorkout({
               disabled={pending || !weight || !reps}
               className="flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-2xl bg-accent font-semibold text-accent-foreground transition-transform active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100"
             >
-              <CheckCircle2 size={20} />
+              {pending ? (
+                <Loader2 size={20} className="animate-spin" />
+              ) : (
+                <CheckCircle2 size={20} />
+              )}
               Registrar serie
             </button>
             {(mostRecentSet || lastSet) && (
@@ -228,7 +242,11 @@ export default function ActiveWorkout({
                 aria-label="Repetir última serie"
                 className="flex min-h-[52px] w-[52px] shrink-0 items-center justify-center rounded-2xl border border-border bg-surface-2 text-foreground transition-transform active:scale-[0.95] disabled:opacity-40"
               >
-                <Copy size={19} />
+                {pending ? (
+                  <Loader2 size={19} className="animate-spin" />
+                ) : (
+                  <Copy size={19} />
+                )}
               </button>
             )}
           </div>
@@ -268,13 +286,15 @@ export default function ActiveWorkout({
                       <Pencil size={14} />
                     </button>
                     <form action={deleteSet.bind(null, workoutId, s.id)}>
-                      <button
-                        type="submit"
+                      <SubmitButton
                         className="flex h-8 w-8 items-center justify-center rounded-full text-muted active:bg-border"
-                        aria-label="Eliminar serie"
+                        ariaLabel="Eliminar serie"
+                        pendingChildren={
+                          <Loader2 size={14} className="animate-spin" />
+                        }
                       >
                         <Trash2 size={15} />
-                      </button>
+                      </SubmitButton>
                     </form>
                   </div>
                 )
@@ -296,6 +316,21 @@ export default function ActiveWorkout({
                 rows={2}
                 className="w-full resize-none bg-transparent text-sm text-foreground outline-none placeholder:text-muted"
               />
+              {notesStatus !== "idle" && (
+                <p className="flex items-center gap-1.5 text-xs text-muted">
+                  {notesStatus === "saving" ? (
+                    <>
+                      <Loader2 size={12} className="animate-spin" />
+                      Guardando...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 size={12} className="text-accent" />
+                      Guardado
+                    </>
+                  )}
+                </p>
+              )}
             </div>
           ) : (
             <button
@@ -308,13 +343,18 @@ export default function ActiveWorkout({
           )}
 
           <form action={finishWorkout.bind(null, workoutId)}>
-            <button
-              type="submit"
-              className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl border border-border font-semibold text-foreground transition-colors active:bg-surface"
+            <SubmitButton
+              className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl border border-border font-semibold text-foreground transition-colors active:bg-surface disabled:opacity-60"
+              pendingChildren={
+                <>
+                  <Loader2 size={17} className="animate-spin" />
+                  Finalizando...
+                </>
+              }
             >
               <Flag size={17} />
               Finalizar entrenamiento
-            </button>
+            </SubmitButton>
           </form>
         </div>
       )}
@@ -430,7 +470,11 @@ function EditSetRow({
           disabled={pending}
           className="flex h-9 flex-1 items-center justify-center gap-1 rounded-xl bg-accent text-sm font-semibold text-accent-foreground disabled:opacity-50"
         >
-          <CheckCircle2 size={14} />
+          {pending ? (
+            <Loader2 size={14} className="animate-spin" />
+          ) : (
+            <CheckCircle2 size={14} />
+          )}
           Guardar
         </button>
       </div>
