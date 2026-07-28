@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Dumbbell, Home, ListChecks, Play } from "lucide-react";
+import { Dumbbell, Flame, Home, ListChecks, Play } from "lucide-react";
 
 const items = [
   { href: "/", icon: Home },
   { href: "/exercises", icon: Dumbbell },
   { href: "/routines", icon: ListChecks },
+  { href: "/cardio", icon: Flame },
   { href: "/workout", icon: Play },
 ];
 

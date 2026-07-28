@@ -19,6 +19,7 @@ model User {
   sex         String?
   routines    Routine[]
   workouts    Workout[]
+  cardioSessions CardioSession[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
@@ -70,6 +71,17 @@ model Workout {
   endTime   DateTime?
   sets      WorkoutSet[]
   notes     String?
+}
+
+model CardioSession {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activityType   String
+  durationMin    Int
+  caloriesBurned Int
+  date           DateTime @default(now())
+  createdAt      DateTime @default(now())
 }
 
 model WorkoutSet {

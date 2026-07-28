@@ -2,17 +2,25 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import PageHeader from "@/components/PageHeader";
-import { ArrowRight, Dumbbell, ListChecks, Play, User } from "lucide-react";
+import { ArrowRight, Dumbbell, Flame, ListChecks, Play, User } from "lucide-react";
+import { getCardioActivity } from "@/lib/calories";
 
 export default async function Home() {
   const user = await getCurrentUser();
 
-  const recentWorkouts = await prisma.workout.findMany({
-    where: { userId: user.id, endTime: { not: null } },
-    orderBy: { startTime: "desc" },
-    take: 5,
-    include: { sets: true },
-  });
+  const [recentWorkouts, recentCardio] = await Promise.all([
+    prisma.workout.findMany({
+      where: { userId: user.id, endTime: { not: null } },
+      orderBy: { startTime: "desc" },
+      take: 5,
+      include: { sets: true },
+    }),
+    prisma.cardioSession.findMany({
+      where: { userId: user.id },
+      orderBy: { date: "desc" },
+      take: 5,
+    }),
+  ]);
 
   return (
     <div>
@@ -38,7 +46,7 @@ export default async function Home() {
           <span className="relative">Empezar entrenamiento</span>
         </Link>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <Link
             href="/routines"
             className="flex min-h-[88px] flex-col items-center justify-center gap-2 rounded-2xl border border-border bg-surface transition-transform active:scale-[0.97] active:bg-surface-2"
@@ -52,6 +60,13 @@ export default async function Home() {
           >
             <Dumbbell className="text-accent" size={22} strokeWidth={1.8} />
             <span className="text-sm font-medium">Ejercicios</span>
+          </Link>
+          <Link
+            href="/cardio"
+            className="flex min-h-[88px] flex-col items-center justify-center gap-2 rounded-2xl border border-border bg-surface transition-transform active:scale-[0.97] active:bg-surface-2"
+          >
+            <Flame className="text-accent" size={22} strokeWidth={1.8} />
+            <span className="text-sm font-medium">Cardio</span>
           </Link>
         </div>
 
@@ -88,6 +103,37 @@ export default async function Home() {
             )}
           </div>
         </div>
+
+        {recentCardio.length > 0 && (
+          <div>
+            <h2 className="mb-3 px-1 text-xs font-semibold uppercase tracking-wide text-muted">
+              Cardio y deportes
+            </h2>
+            <div className="space-y-2.5">
+              {recentCardio.map((c) => (
+                <Link
+                  key={c.id}
+                  href="/cardio"
+                  className="flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3.5 transition-transform active:scale-[0.98] active:bg-surface-2"
+                >
+                  <div>
+                    <p className="font-medium text-foreground">
+                      {getCardioActivity(c.activityType).label}
+                    </p>
+                    <p className="mt-0.5 text-sm text-muted">
+                      {new Date(c.date).toLocaleDateString("es-AR", {
+                        day: "numeric",
+                        month: "short",
+                      })}{" "}
+                      · {c.durationMin} min · ~{c.caloriesBurned} kcal
+                    </p>
+                  </div>
+                  <ArrowRight size={16} className="text-muted" />
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
