@@ -46,13 +46,15 @@ model Routine {
 }
 
 model RoutineItem {
-  id         String   @id @default(uuid())
-  routineId  String
-  routine    Routine  @relation(fields: [routineId], references: [id], onDelete: Cascade)
-  exerciseId String
-  exercise   Exercise @relation(fields: [exerciseId], references: [id])
-  targetSets Int      @default(3)
-  order      Int      @default(0)
+  id            String   @id @default(uuid())
+  routineId     String
+  routine       Routine  @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  exerciseId    String
+  exercise      Exercise @relation(fields: [exerciseId], references: [id])
+  targetSets    Int      @default(3)
+  targetRepsMin Int?
+  targetRepsMax Int?
+  order         Int      @default(0)
 }
 
 model Workout {
@@ -77,6 +79,7 @@ model WorkoutSet {
   weight     Float
   reps       Int
   rpe        Float?
+  notes      String?
   completed  Boolean  @default(true)
   createdAt  DateTime @default(now())
 }

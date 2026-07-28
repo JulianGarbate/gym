@@ -1,10 +1,13 @@
 import { prisma } from "@/lib/prisma";
-import PageHeader from "@/components/PageHeader";
 import { notFound } from "next/navigation";
-import { removeRoutineItem } from "@/app/actions/routines";
+import {
+  duplicateRoutine,
+  moveRoutineItem,
+  removeRoutineItem,
+} from "@/app/actions/routines";
 import AddExerciseToRoutine from "@/components/AddExerciseToRoutine";
 import StartWorkoutButton from "@/components/StartWorkoutButton";
-import { Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Copy, Trash2 } from "lucide-react";
 
 export default async function RoutineDetailPage({
   params,
@@ -31,7 +34,28 @@ export default async function RoutineDetailPage({
 
   return (
     <div>
-      <PageHeader title={routine.name} subtitle={routine.description ?? undefined} />
+      <div className="flex items-start justify-between gap-3 px-5 pb-0 pt-[calc(env(safe-area-inset-top)+1rem)]">
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate text-2xl font-semibold tracking-tight text-foreground">
+            {routine.name}
+          </h1>
+          {routine.description && (
+            <p className="mt-1 text-sm text-muted">{routine.description}</p>
+          )}
+        </div>
+        <form action={duplicateRoutine.bind(null, routine.id)}>
+          <button
+            type="submit"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-muted active:bg-surface-2"
+            aria-label="Duplicar rutina"
+            title="Duplicar rutina"
+          >
+            <Copy size={16} />
+          </button>
+        </form>
+      </div>
+      <div className="h-4" />
+
       <div className="px-5 py-5 space-y-2.5">
         <StartWorkoutButton routineId={routine.id} routineName={routine.name} />
 
@@ -48,8 +72,35 @@ export default async function RoutineDetailPage({
                 {item.exercise.name}
               </p>
               <p className="text-sm text-muted">
-                {item.targetSets} series objetivo
+                {item.targetSets} series
+                {item.targetRepsMin && item.targetRepsMax
+                  ? ` · ${item.targetRepsMin}-${item.targetRepsMax} reps`
+                  : ""}
               </p>
+            </div>
+            <div className="flex shrink-0 flex-col">
+              <form action={moveRoutineItem.bind(null, routine.id, item.id, "up")}>
+                <button
+                  type="submit"
+                  disabled={i === 0}
+                  className="flex h-6 w-8 items-center justify-center text-muted disabled:opacity-20"
+                  aria-label="Subir"
+                >
+                  <ChevronUp size={16} />
+                </button>
+              </form>
+              <form
+                action={moveRoutineItem.bind(null, routine.id, item.id, "down")}
+              >
+                <button
+                  type="submit"
+                  disabled={i === routine.items.length - 1}
+                  className="flex h-6 w-8 items-center justify-center text-muted disabled:opacity-20"
+                  aria-label="Bajar"
+                >
+                  <ChevronDown size={16} />
+                </button>
+              </form>
             </div>
             <form action={removeRoutineItem.bind(null, routine.id, item.id)}>
               <button

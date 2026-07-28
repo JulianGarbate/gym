@@ -2,8 +2,23 @@
 
 import { useState, useTransition } from "react";
 import type { Exercise, WorkoutSet } from "@prisma/client";
-import { CheckCircle2, ChevronDown, Flag, Plus, Trash2 } from "lucide-react";
-import { deleteSet, finishWorkout, logSet } from "@/app/actions/workouts";
+import {
+  CheckCircle2,
+  ChevronDown,
+  Copy,
+  Flag,
+  Pencil,
+  Plus,
+  Trash2,
+  X,
+} from "lucide-react";
+import {
+  deleteSet,
+  finishWorkout,
+  logSet,
+  updateSet,
+  updateWorkoutNotes,
+} from "@/app/actions/workouts";
 import RestTimer from "@/components/RestTimer";
 
 type LoggedSet = WorkoutSet & { exercise: Exercise };
@@ -15,19 +30,24 @@ export default function ActiveWorkout({
   loggedSets,
   lastSetByExercise,
   isFinished,
+  initialNotes,
 }: {
   workoutId: string;
   exercisesInWorkout: Exercise[];
   allExercises: Exercise[];
   loggedSets: LoggedSet[];
-  lastSetByExercise: Record<string, { weight: number; reps: number }>;
+  lastSetByExercise: Record<string, { weight: number; reps: number; rpe: number | null }>;
   isFinished: boolean;
+  initialNotes: string | null;
 }) {
   const [exercises, setExercises] = useState(exercisesInWorkout);
   const [activeExerciseId, setActiveExerciseId] = useState(
     exercisesInWorkout[0]?.id ?? ""
   );
   const [showPicker, setShowPicker] = useState(false);
+  const [editingSetId, setEditingSetId] = useState<string | null>(null);
+  const [showNotes, setShowNotes] = useState(!!initialNotes);
+  const [notes, setNotes] = useState(initialNotes ?? "");
   const [pending, startTransition] = useTransition();
 
   const activeExercise = exercises.find((e) => e.id === activeExerciseId);
@@ -35,6 +55,7 @@ export default function ActiveWorkout({
     (s) => s.exerciseId === activeExerciseId
   );
   const lastSet = lastSetByExercise[activeExerciseId];
+  const mostRecentSet = setsForActive[setsForActive.length - 1];
 
   const [weight, setWeight] = useState("");
   const [reps, setReps] = useState("");
@@ -56,12 +77,30 @@ export default function ActiveWorkout({
     });
   }
 
+  function handleRepeatLast() {
+    const source = mostRecentSet ?? (lastSet ? { ...lastSet } : null);
+    if (!source || !activeExerciseId) return;
+    startTransition(async () => {
+      await logSet(
+        workoutId,
+        activeExerciseId,
+        source.weight,
+        source.reps,
+        "rpe" in source ? source.rpe ?? null : null
+      );
+    });
+  }
+
   function addExerciseToSession(ex: Exercise) {
     setExercises((prev) =>
       prev.some((e) => e.id === ex.id) ? prev : [...prev, ex]
     );
     setActiveExerciseId(ex.id);
     setShowPicker(false);
+  }
+
+  function handleSaveNotes() {
+    startTransition(() => updateWorkoutNotes(workoutId, notes));
   }
 
   return (
@@ -162,57 +201,112 @@ export default function ActiveWorkout({
             </div>
           </div>
 
-          <button
-            onClick={handleLogSet}
-            disabled={pending || !weight || !reps}
-            className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-accent font-semibold text-accent-foreground transition-transform active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100"
-          >
-            <CheckCircle2 size={20} />
-            Registrar serie
-          </button>
+          <div className="flex gap-2.5">
+            <button
+              onClick={handleLogSet}
+              disabled={pending || !weight || !reps}
+              className="flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-2xl bg-accent font-semibold text-accent-foreground transition-transform active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100"
+            >
+              <CheckCircle2 size={20} />
+              Registrar serie
+            </button>
+            {(mostRecentSet || lastSet) && (
+              <button
+                onClick={handleRepeatLast}
+                disabled={pending}
+                title="Repetir última serie"
+                aria-label="Repetir última serie"
+                className="flex min-h-[52px] w-[52px] shrink-0 items-center justify-center rounded-2xl border border-border bg-surface-2 text-foreground transition-transform active:scale-[0.95] disabled:opacity-40"
+              >
+                <Copy size={19} />
+              </button>
+            )}
+          </div>
 
           {setsForActive.length > 0 && (
             <div className="space-y-1.5 pt-1">
-              {setsForActive.map((s, i) => (
-                <div
-                  key={s.id}
-                  className="flex items-center justify-between rounded-xl bg-surface-2 px-3.5 py-2.5 text-sm"
-                >
-                  <span className="text-foreground">
-                    <span className="text-muted">Serie {i + 1}</span>{" "}
-                    <span className="font-medium">
-                      {s.weight}kg × {s.reps}
-                    </span>
-                    {s.rpe ? (
-                      <span className="text-muted"> · RPE {s.rpe}</span>
-                    ) : null}
-                  </span>
-                  <form action={deleteSet.bind(null, workoutId, s.id)}>
+              {setsForActive.map((s, i) =>
+                editingSetId === s.id ? (
+                  <EditSetRow
+                    key={s.id}
+                    workoutId={workoutId}
+                    set={s}
+                    onDone={() => setEditingSetId(null)}
+                  />
+                ) : (
+                  <div
+                    key={s.id}
+                    className="flex items-center justify-between rounded-xl bg-surface-2 px-3.5 py-2.5 text-sm"
+                  >
                     <button
-                      type="submit"
-                      className="flex h-8 w-8 items-center justify-center rounded-full text-muted active:bg-border"
-                      aria-label="Eliminar serie"
+                      onClick={() => setEditingSetId(s.id)}
+                      className="flex-1 text-left text-foreground"
                     >
-                      <Trash2 size={15} />
+                      <span className="text-muted">Serie {i + 1}</span>{" "}
+                      <span className="font-medium">
+                        {s.weight}kg × {s.reps}
+                      </span>
+                      {s.rpe ? (
+                        <span className="text-muted"> · RPE {s.rpe}</span>
+                      ) : null}
                     </button>
-                  </form>
-                </div>
-              ))}
+                    <button
+                      onClick={() => setEditingSetId(s.id)}
+                      className="flex h-8 w-8 items-center justify-center rounded-full text-muted active:bg-border"
+                      aria-label="Editar serie"
+                    >
+                      <Pencil size={14} />
+                    </button>
+                    <form action={deleteSet.bind(null, workoutId, s.id)}>
+                      <button
+                        type="submit"
+                        className="flex h-8 w-8 items-center justify-center rounded-full text-muted active:bg-border"
+                        aria-label="Eliminar serie"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </form>
+                  </div>
+                )
+              )}
             </div>
           )}
         </div>
       )}
 
       {!isFinished && (
-        <form action={finishWorkout.bind(null, workoutId)}>
-          <button
-            type="submit"
-            className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl border border-border font-semibold text-foreground transition-colors active:bg-surface"
-          >
-            <Flag size={17} />
-            Finalizar entrenamiento
-          </button>
-        </form>
+        <div className="space-y-2.5">
+          {showNotes ? (
+            <div className="space-y-2 rounded-2xl border border-border bg-surface p-3">
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                onBlur={handleSaveNotes}
+                placeholder="Notas del entrenamiento..."
+                rows={2}
+                className="w-full resize-none bg-transparent text-sm text-foreground outline-none placeholder:text-muted"
+              />
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowNotes(true)}
+              className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border text-sm font-medium text-muted transition-colors active:bg-surface"
+            >
+              <Pencil size={15} />
+              Agregar nota
+            </button>
+          )}
+
+          <form action={finishWorkout.bind(null, workoutId)}>
+            <button
+              type="submit"
+              className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl border border-border font-semibold text-foreground transition-colors active:bg-surface"
+            >
+              <Flag size={17} />
+              Finalizar entrenamiento
+            </button>
+          </form>
+        </div>
       )}
 
       <RestTimer />
@@ -255,6 +349,81 @@ export default function ActiveWorkout({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function EditSetRow({
+  workoutId,
+  set,
+  onDone,
+}: {
+  workoutId: string;
+  set: WorkoutSet;
+  onDone: () => void;
+}) {
+  const [weight, setWeight] = useState(String(set.weight));
+  const [reps, setReps] = useState(String(set.reps));
+  const [rpe, setRpe] = useState(set.rpe ? String(set.rpe) : "");
+  const [pending, startTransition] = useTransition();
+
+  function save() {
+    startTransition(async () => {
+      await updateSet(
+        workoutId,
+        set.id,
+        parseFloat(weight) || 0,
+        parseInt(reps, 10) || 0,
+        rpe ? parseFloat(rpe) : null,
+        set.notes
+      );
+      onDone();
+    });
+  }
+
+  return (
+    <div className="space-y-2 rounded-xl border border-accent/40 bg-surface-2 p-3">
+      <div className="grid grid-cols-3 gap-2">
+        <input
+          type="number"
+          inputMode="decimal"
+          value={weight}
+          onChange={(e) => setWeight(e.target.value)}
+          className="min-h-[40px] rounded-xl border border-border bg-surface px-2 text-center text-sm font-semibold text-foreground outline-none focus:border-accent/60"
+        />
+        <input
+          type="number"
+          inputMode="numeric"
+          value={reps}
+          onChange={(e) => setReps(e.target.value)}
+          className="min-h-[40px] rounded-xl border border-border bg-surface px-2 text-center text-sm font-semibold text-foreground outline-none focus:border-accent/60"
+        />
+        <input
+          type="number"
+          inputMode="decimal"
+          value={rpe}
+          onChange={(e) => setRpe(e.target.value)}
+          placeholder="RPE"
+          className="min-h-[40px] rounded-xl border border-border bg-surface px-2 text-center text-sm font-semibold text-foreground outline-none focus:border-accent/60"
+        />
+      </div>
+      <div className="flex gap-2">
+        <button
+          onClick={onDone}
+          className="flex h-9 flex-1 items-center justify-center gap-1 rounded-xl border border-border text-sm text-muted"
+        >
+          <X size={14} />
+          Cancelar
+        </button>
+        <button
+          onClick={save}
+          disabled={pending}
+          className="flex h-9 flex-1 items-center justify-center gap-1 rounded-xl bg-accent text-sm font-semibold text-accent-foreground disabled:opacity-50"
+        >
+          <CheckCircle2 size={14} />
+          Guardar
+        </button>
+      </div>
     </div>
   );
 }

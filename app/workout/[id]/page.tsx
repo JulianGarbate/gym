@@ -39,16 +39,26 @@ export default async function WorkoutSessionPage({
     orderBy: { createdAt: "desc" },
   });
 
-  const lastSetByExercise: Record<string, { weight: number; reps: number }> = {};
+  const lastSetByExercise: Record<
+    string,
+    { weight: number; reps: number; rpe: number | null }
+  > = {};
   for (const s of lastSets) {
     if (!lastSetByExercise[s.exerciseId]) {
-      lastSetByExercise[s.exerciseId] = { weight: s.weight, reps: s.reps };
+      lastSetByExercise[s.exerciseId] = {
+        weight: s.weight,
+        reps: s.reps,
+        rpe: s.rpe,
+      };
     }
   }
 
   return (
     <div>
-      <PageHeader title={workout.name} subtitle="Entrenamiento en curso" />
+      <PageHeader
+        title={workout.name}
+        subtitle={workout.endTime ? "Entrenamiento finalizado" : "Entrenamiento en curso"}
+      />
       <ActiveWorkout
         workoutId={workout.id}
         exercisesInWorkout={exercisesInWorkout}
@@ -56,6 +66,7 @@ export default async function WorkoutSessionPage({
         loggedSets={workout.sets}
         lastSetByExercise={lastSetByExercise}
         isFinished={!!workout.endTime}
+        initialNotes={workout.notes}
       />
     </div>
   );

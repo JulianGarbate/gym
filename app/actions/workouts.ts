@@ -38,8 +38,31 @@ export async function logSet(
   revalidatePath(`/workout/${workoutId}`);
 }
 
+export async function updateSet(
+  workoutId: string,
+  setId: string,
+  weight: number,
+  reps: number,
+  rpe: number | null,
+  notes: string | null
+) {
+  await prisma.workoutSet.update({
+    where: { id: setId },
+    data: { weight, reps, rpe: rpe ?? null, notes: notes || null },
+  });
+  revalidatePath(`/workout/${workoutId}`);
+}
+
 export async function deleteSet(workoutId: string, setId: string) {
   await prisma.workoutSet.delete({ where: { id: setId } });
+  revalidatePath(`/workout/${workoutId}`);
+}
+
+export async function updateWorkoutNotes(workoutId: string, notes: string) {
+  await prisma.workout.update({
+    where: { id: workoutId },
+    data: { notes: notes || null },
+  });
   revalidatePath(`/workout/${workoutId}`);
 }
 
@@ -49,7 +72,7 @@ export async function finishWorkout(workoutId: string) {
     data: { endTime: new Date() },
   });
   revalidatePath(`/workout/${workoutId}`);
-  redirect("/");
+  redirect(`/workout/${workoutId}/summary`);
 }
 
 export async function getLastSetForExercise(exerciseId: string) {

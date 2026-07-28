@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Exercise } from "@prisma/client";
-import { ListFilter, Search, X } from "lucide-react";
+import { ListFilter, Search, TrendingUp, X } from "lucide-react";
+import { getExerciseProgress, type ProgressPoint } from "@/app/actions/progress";
+import ProgressChart from "@/components/ProgressChart";
 
 export default function ExerciseExplorer({
   exercises,
@@ -14,6 +16,19 @@ export default function ExerciseExplorer({
   const [equipment, setEquipment] = useState("Todos");
   const [selected, setSelected] = useState<Exercise | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [tab, setTab] = useState<"info" | "progress">("info");
+  const [progress, setProgress] = useState<ProgressPoint[] | null>(null);
+
+  useEffect(() => {
+    if (!selected || tab !== "progress") return;
+    let cancelled = false;
+    getExerciseProgress(selected.id).then((data) => {
+      if (!cancelled) setProgress(data);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [selected, tab]);
 
   const categories = useMemo(
     () => ["Todos", ...Array.from(new Set(exercises.map((e) => e.category))).sort()],
@@ -84,7 +99,11 @@ export default function ExerciseExplorer({
         {filtered.map((ex) => (
           <button
             key={ex.id}
-            onClick={() => setSelected(ex)}
+            onClick={() => {
+              setSelected(ex);
+              setTab("info");
+              setProgress(null);
+            }}
             className="flex flex-col overflow-hidden rounded-2xl border border-border bg-surface text-left transition-transform active:scale-[0.97]"
           >
             <div className="relative aspect-square w-full bg-surface-2">
@@ -134,25 +153,63 @@ export default function ExerciseExplorer({
                 <X size={18} />
               </button>
             </div>
-            {selected.videoUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={selected.videoUrl}
-                alt={selected.name}
-                className="w-full bg-surface-2 object-contain"
-              />
-            )}
-            <div className="space-y-2.5 p-4">
-              <p className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1 text-xs font-medium text-muted">
-                {selected.category}
-                {selected.equipment ? ` · ${selected.equipment}` : ""}
-              </p>
-              {selected.instructions && (
-                <p className="text-sm leading-relaxed text-foreground/90">
-                  {selected.instructions}
-                </p>
-              )}
+            <div className="flex border-b border-border">
+              <button
+                onClick={() => setTab("info")}
+                className={`flex-1 py-3 text-sm font-semibold transition-colors ${
+                  tab === "info"
+                    ? "border-b-2 border-accent text-accent"
+                    : "text-muted"
+                }`}
+              >
+                Info
+              </button>
+              <button
+                onClick={() => setTab("progress")}
+                className={`flex flex-1 items-center justify-center gap-1.5 py-3 text-sm font-semibold transition-colors ${
+                  tab === "progress"
+                    ? "border-b-2 border-accent text-accent"
+                    : "text-muted"
+                }`}
+              >
+                <TrendingUp size={15} />
+                Progreso
+              </button>
             </div>
+
+            {tab === "info" ? (
+              <>
+                {selected.videoUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={selected.videoUrl}
+                    alt={selected.name}
+                    className="w-full bg-surface-2 object-contain"
+                  />
+                )}
+                <div className="space-y-2.5 p-4">
+                  <p className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1 text-xs font-medium text-muted">
+                    {selected.category}
+                    {selected.equipment ? ` · ${selected.equipment}` : ""}
+                  </p>
+                  {selected.instructions && (
+                    <p className="text-sm leading-relaxed text-foreground/90">
+                      {selected.instructions}
+                    </p>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="p-4">
+                {progress === null ? (
+                  <p className="py-6 text-center text-sm text-muted">
+                    Cargando...
+                  </p>
+                ) : (
+                  <ProgressChart data={progress} />
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
