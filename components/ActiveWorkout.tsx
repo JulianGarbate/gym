@@ -189,6 +189,7 @@ export default function ActiveWorkout({
               <input
                 type="number"
                 inputMode="decimal"
+                step="0.1"
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
                 placeholder={lastSet ? String(lastSet.weight) : "0"}
@@ -215,6 +216,7 @@ export default function ActiveWorkout({
               <input
                 type="number"
                 inputMode="decimal"
+                step="0.5"
                 value={rpe}
                 onChange={(e) => setRpe(e.target.value)}
                 placeholder="-"
@@ -449,6 +451,7 @@ function EditSetRow({
         <input
           type="number"
           inputMode="decimal"
+          step="0.1"
           value={weight}
           onChange={(e) => setWeight(e.target.value)}
           className="min-h-[40px] rounded-xl border border-border bg-surface px-2 text-center text-sm font-semibold text-foreground outline-none focus:border-accent/60"
@@ -463,6 +466,7 @@ function EditSetRow({
         <input
           type="number"
           inputMode="decimal"
+          step="0.5"
           value={rpe}
           onChange={(e) => setRpe(e.target.value)}
           placeholder="RPE"
