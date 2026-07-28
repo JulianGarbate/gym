@@ -61,9 +61,10 @@ export default async function Home() {
           </h2>
           <div className="space-y-2.5">
             {recentWorkouts.map((w) => (
-              <div
+              <Link
                 key={w.id}
-                className="flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3.5"
+                href={`/workout/${w.id}/summary`}
+                className="flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3.5 transition-transform active:scale-[0.98] active:bg-surface-2"
               >
                 <div>
                   <p className="font-medium text-foreground">{w.name}</p>
@@ -76,7 +77,7 @@ export default async function Home() {
                   </p>
                 </div>
                 <ArrowRight size={16} className="text-muted" />
-              </div>
+              </Link>
             ))}
             {recentWorkouts.length === 0 && (
               <div className="rounded-2xl border border-dashed border-border px-4 py-8 text-center">
