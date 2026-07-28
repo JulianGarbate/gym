@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
-import { estimateCardioCalories } from "@/lib/calories";
+import { estimateCardioCalories, getCardioActivity } from "@/lib/calories";
 import {
   deleteWorkoutFromDailyCal,
   syncWorkoutToDailyCal,
@@ -49,7 +49,8 @@ export async function logCardio(
       await syncWorkoutToDailyCal(
         session.id,
         caloriesBurned,
-        session.date.toISOString()
+        session.date.toISOString(),
+        getCardioActivity(activityType).label
       );
     } catch (err) {
       console.error("Daily Cal sync failed for cardio session", err);

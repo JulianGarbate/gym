@@ -7,9 +7,11 @@ import { syncWorkoutToDailyCal } from "@/app/actions/dailyCal";
 export default function SendToDailyCalButton({
   workoutId,
   calories,
+  name,
 }: {
   workoutId: string;
   calories: number;
+  name?: string;
 }) {
   const [status, setStatus] = useState<"idle" | "sent" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +19,12 @@ export default function SendToDailyCalButton({
 
   function handleClick() {
     startTransition(async () => {
-      const result = await syncWorkoutToDailyCal(workoutId, calories);
+      const result = await syncWorkoutToDailyCal(
+        workoutId,
+        calories,
+        undefined,
+        name
+      );
       if (result.ok) {
         setStatus("sent");
       } else {

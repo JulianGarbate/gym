@@ -141,7 +141,11 @@ export default async function WorkoutSummaryPage({
               Se sincroniza con Daily Cal automáticamente
             </p>
           </div>
-          <SendToDailyCalButton workoutId={workout.id} calories={calories} />
+          <SendToDailyCalButton
+            workoutId={workout.id}
+            calories={calories}
+            name={workout.name}
+          />
         </div>
       ) : (
         <Link

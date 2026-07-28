@@ -45,7 +45,12 @@ async function resyncDailyCalIfFinished(workoutId: string) {
       )
     );
     const calories = estimateCaloriesBurned(workout.user.weightKg, durationMin);
-    await syncWorkoutToDailyCal(workout.id, calories, workout.startTime.toISOString());
+    await syncWorkoutToDailyCal(
+      workout.id,
+      calories,
+      workout.startTime.toISOString(),
+      workout.name
+    );
   } catch (err) {
     console.error("Daily Cal resync failed", err);
   }
@@ -122,7 +127,12 @@ export async function finishWorkout(workoutId: string) {
         )
       );
       const calories = estimateCaloriesBurned(workout.user.weightKg, durationMin);
-      await syncWorkoutToDailyCal(workout.id, calories, workout.startTime.toISOString());
+      await syncWorkoutToDailyCal(
+        workout.id,
+        calories,
+        workout.startTime.toISOString(),
+        workout.name
+      );
     }
   } catch (err) {
     console.error("Daily Cal sync failed on finishWorkout", err);

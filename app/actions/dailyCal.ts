@@ -15,7 +15,8 @@ export interface DailyCalResult {
 export async function syncWorkoutToDailyCal(
   workoutId: string,
   caloriesBurned: number,
-  date?: string
+  date?: string,
+  name?: string
 ): Promise<DailyCalResult> {
   const token = process.env.EXERCISE_API_TOKEN;
   if (!token) {
@@ -34,6 +35,7 @@ export async function syncWorkoutToDailyCal(
         source: "Gym Tracker",
         externalId: workoutId,
         ...(date ? { date } : {}),
+        ...(name ? { name, description: name } : {}),
       }),
     });
 
