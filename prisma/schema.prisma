@@ -1,9 +1,7 @@
 // Gym Tracker PWA - Prisma schema
-// NOTE: using SQLite for local/dev convenience. Swap provider to "postgresql"
-// and DATABASE_URL to a Postgres connection string for production (see doc).
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
