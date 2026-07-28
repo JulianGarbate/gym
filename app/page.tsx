@@ -2,7 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import PageHeader from "@/components/PageHeader";
-import { Dumbbell, ListChecks, Play } from "lucide-react";
+import { ArrowRight, Dumbbell, ListChecks, Play } from "lucide-react";
 
 export default async function Home() {
   const user = await getCurrentUser();
@@ -17,53 +17,62 @@ export default async function Home() {
   return (
     <div>
       <PageHeader title="Gym Tracker" subtitle={`Hola, ${user.name ?? "atleta"}`} />
-      <div className="px-4 py-4 space-y-4">
+      <div className="px-5 py-5 space-y-5">
         <Link
           href="/workout"
-          className="flex min-h-[64px] items-center justify-center gap-2 rounded-xl bg-cyan-500 text-lg font-bold text-gray-950 active:bg-cyan-400"
+          className="group relative flex min-h-[76px] items-center justify-center gap-2.5 overflow-hidden rounded-3xl bg-accent text-lg font-semibold text-accent-foreground shadow-[0_8px_30px_-8px] shadow-accent/50 transition-transform active:scale-[0.98]"
         >
-          <Play size={24} />
-          Empezar entrenamiento
+          <span className="absolute inset-0 bg-gradient-to-br from-white/25 via-transparent to-transparent" />
+          <Play size={22} className="relative fill-current" />
+          <span className="relative">Empezar entrenamiento</span>
         </Link>
 
         <div className="grid grid-cols-2 gap-3">
           <Link
             href="/routines"
-            className="flex min-h-[80px] flex-col items-center justify-center gap-1 rounded-xl border border-gray-800 bg-gray-900 active:bg-gray-800"
+            className="flex min-h-[88px] flex-col items-center justify-center gap-2 rounded-2xl border border-border bg-surface transition-transform active:scale-[0.97] active:bg-surface-2"
           >
-            <ListChecks className="text-cyan-400" size={22} />
+            <ListChecks className="text-accent" size={22} strokeWidth={1.8} />
             <span className="text-sm font-medium">Rutinas</span>
           </Link>
           <Link
             href="/exercises"
-            className="flex min-h-[80px] flex-col items-center justify-center gap-1 rounded-xl border border-gray-800 bg-gray-900 active:bg-gray-800"
+            className="flex min-h-[88px] flex-col items-center justify-center gap-2 rounded-2xl border border-border bg-surface transition-transform active:scale-[0.97] active:bg-surface-2"
           >
-            <Dumbbell className="text-cyan-400" size={22} />
+            <Dumbbell className="text-accent" size={22} strokeWidth={1.8} />
             <span className="text-sm font-medium">Ejercicios</span>
           </Link>
         </div>
 
         <div>
-          <h2 className="mb-2 text-sm font-semibold text-gray-400">
+          <h2 className="mb-3 px-1 text-xs font-semibold uppercase tracking-wide text-muted">
             Entrenamientos recientes
           </h2>
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             {recentWorkouts.map((w) => (
               <div
                 key={w.id}
-                className="rounded-xl border border-gray-800 bg-gray-900 px-4 py-3"
+                className="flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3.5"
               >
-                <p className="font-medium">{w.name}</p>
-                <p className="text-sm text-gray-500">
-                  {new Date(w.startTime).toLocaleDateString("es-AR")} ·{" "}
-                  {w.sets.length} series
-                </p>
+                <div>
+                  <p className="font-medium text-foreground">{w.name}</p>
+                  <p className="mt-0.5 text-sm text-muted">
+                    {new Date(w.startTime).toLocaleDateString("es-AR", {
+                      day: "numeric",
+                      month: "short",
+                    })}{" "}
+                    · {w.sets.length} series
+                  </p>
+                </div>
+                <ArrowRight size={16} className="text-muted" />
               </div>
             ))}
             {recentWorkouts.length === 0 && (
-              <p className="py-4 text-center text-gray-500">
-                Todavía no completaste ningún entrenamiento.
-              </p>
+              <div className="rounded-2xl border border-dashed border-border px-4 py-8 text-center">
+                <p className="text-sm text-muted">
+                  Todavía no completaste ningún entrenamiento.
+                </p>
+              </div>
             )}
           </div>
         </div>

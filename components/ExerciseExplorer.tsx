@@ -37,11 +37,11 @@ export default function ExerciseExplorer({
   });
 
   return (
-    <div className="px-4 py-4">
-      <div className="relative mb-3">
+    <div className="px-5 py-5">
+      <div className="relative mb-4">
         <Search
-          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
-          size={20}
+          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
+          size={19}
         />
         <input
           type="text"
@@ -49,19 +49,19 @@ export default function ExerciseExplorer({
           placeholder="Buscar ejercicio..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="min-h-[48px] w-full rounded-xl border border-gray-800 bg-gray-900 py-3 pl-10 pr-4 text-base outline-none focus:border-cyan-500"
+          className="min-h-[48px] w-full rounded-2xl border border-border bg-surface py-3 pl-11 pr-4 text-base text-foreground outline-none transition-colors focus:border-accent/60 focus:ring-2 focus:ring-accent/20"
         />
       </div>
 
-      <div className="mb-2 flex gap-2 overflow-x-auto pb-1">
+      <div className="mb-2 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
         {categories.map((c) => (
           <button
             key={c}
             onClick={() => setCategory(c)}
-            className={`min-h-[40px] shrink-0 rounded-full px-4 text-sm font-medium transition-colors ${
+            className={`min-h-[38px] shrink-0 rounded-full px-4 text-sm font-medium transition-all ${
               category === c
-                ? "bg-cyan-500 text-gray-950"
-                : "bg-gray-900 text-gray-300 border border-gray-800"
+                ? "bg-accent text-accent-foreground"
+                : "border border-border bg-surface text-muted active:bg-surface-2"
             }`}
           >
             {c}
@@ -69,15 +69,15 @@ export default function ExerciseExplorer({
         ))}
       </div>
 
-      <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+      <div className="mb-5 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
         {equipments.map((eq) => (
           <button
             key={eq}
             onClick={() => setEquipment(eq)}
-            className={`min-h-[40px] shrink-0 rounded-full px-4 text-sm font-medium transition-colors ${
+            className={`min-h-[38px] shrink-0 rounded-full px-4 text-sm font-medium transition-all ${
               equipment === eq
-                ? "bg-gray-100 text-gray-950"
-                : "bg-gray-900 text-gray-400 border border-gray-800"
+                ? "bg-foreground text-background"
+                : "border border-border bg-surface text-muted active:bg-surface-2"
             }`}
           >
             {eq}
@@ -90,9 +90,9 @@ export default function ExerciseExplorer({
           <button
             key={ex.id}
             onClick={() => setSelected(ex)}
-            className="flex min-h-[48px] flex-col overflow-hidden rounded-xl border border-gray-800 bg-gray-900 text-left active:scale-[0.98] transition-transform"
+            className="flex flex-col overflow-hidden rounded-2xl border border-border bg-surface text-left transition-transform active:scale-[0.97]"
           >
-            <div className="relative aspect-square w-full bg-gray-800">
+            <div className="relative aspect-square w-full bg-surface-2">
               {ex.videoUrl && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -103,36 +103,40 @@ export default function ExerciseExplorer({
                 />
               )}
             </div>
-            <div className="p-2">
-              <p className="line-clamp-2 text-sm font-semibold">{ex.name}</p>
-              <p className="text-xs text-gray-500">{ex.category}</p>
+            <div className="p-2.5">
+              <p className="line-clamp-2 text-sm font-semibold leading-snug text-foreground">
+                {ex.name}
+              </p>
+              <p className="mt-0.5 text-xs text-muted">{ex.category}</p>
             </div>
           </button>
         ))}
         {filtered.length === 0 && (
-          <p className="col-span-2 py-8 text-center text-gray-500">
-            No se encontraron ejercicios.
-          </p>
+          <div className="col-span-2 rounded-2xl border border-dashed border-border py-10 text-center">
+            <p className="text-sm text-muted">No se encontraron ejercicios.</p>
+          </div>
         )}
       </div>
 
       {selected && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 sm:items-center"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm sm:items-center"
           onClick={() => setSelected(null)}
         >
           <div
-            className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-t-2xl bg-gray-950 border border-gray-800 sm:rounded-2xl"
+            className="animate-fade-in max-h-[85vh] w-full max-w-md overflow-y-auto rounded-t-3xl border border-border bg-surface sm:rounded-3xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-gray-800 p-4">
-              <h2 className="text-lg font-bold">{selected.name}</h2>
+            <div className="flex items-center justify-between border-b border-border p-4">
+              <h2 className="text-lg font-semibold tracking-tight">
+                {selected.name}
+              </h2>
               <button
                 onClick={() => setSelected(null)}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-900"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-2 text-muted active:bg-border"
                 aria-label="Cerrar"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
             {selected.videoUrl && (
@@ -140,16 +144,16 @@ export default function ExerciseExplorer({
               <img
                 src={selected.videoUrl}
                 alt={selected.name}
-                className="w-full bg-gray-900 object-contain"
+                className="w-full bg-surface-2 object-contain"
               />
             )}
-            <div className="space-y-2 p-4">
-              <p className="text-sm text-gray-400">
+            <div className="space-y-2.5 p-4">
+              <p className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1 text-xs font-medium text-muted">
                 {selected.category}
                 {selected.equipment ? ` · ${selected.equipment}` : ""}
               </p>
               {selected.instructions && (
-                <p className="text-sm leading-relaxed text-gray-200">
+                <p className="text-sm leading-relaxed text-foreground/90">
                   {selected.instructions}
                 </p>
               )}

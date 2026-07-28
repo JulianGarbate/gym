@@ -19,9 +19,9 @@ export default function StartWorkoutButton({
       onClick={() =>
         startTransition(() => startWorkout(routineId, routineName))
       }
-      className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 font-semibold text-gray-950 active:bg-cyan-400 disabled:opacity-60"
+      className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-accent font-semibold text-accent-foreground transition-transform active:scale-[0.98] disabled:opacity-60"
     >
-      <Play size={20} />
+      <Play size={19} className="fill-current" />
       {pending ? "Iniciando..." : "Empezar entrenamiento"}
     </button>
   );

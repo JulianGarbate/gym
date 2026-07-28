@@ -6,9 +6,13 @@ export default function PageHeader({
   subtitle?: string;
 }) {
   return (
-    <header className="sticky top-0 z-30 border-b border-gray-800 bg-gray-950/95 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] backdrop-blur">
-      <h1 className="text-xl font-bold">{title}</h1>
-      {subtitle && <p className="mt-0.5 text-sm text-gray-400">{subtitle}</p>}
+    <header className="sticky top-0 z-30 border-b border-border/70 bg-background/85 px-5 pb-4 pt-[calc(env(safe-area-inset-top)+1rem)] backdrop-blur-xl">
+      <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+        {title}
+      </h1>
+      {subtitle && (
+        <p className="mt-1 text-sm text-muted">{subtitle}</p>
+      )}
     </header>
   );
 }

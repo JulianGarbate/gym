@@ -32,34 +32,36 @@ export default function AddExerciseToRoutine({
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl border border-dashed border-gray-700 font-medium text-gray-300 active:bg-gray-900"
+        className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border font-medium text-muted transition-colors active:bg-surface"
       >
-        <Plus size={20} />
+        <Plus size={19} />
         Agregar ejercicio
       </button>
 
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 sm:items-center"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm sm:items-center"
           onClick={() => setOpen(false)}
         >
           <div
-            className="flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-t-2xl border border-gray-800 bg-gray-950 sm:rounded-2xl"
+            className="animate-fade-in flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-t-3xl border border-border bg-surface sm:rounded-3xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-gray-800 p-4">
-              <h2 className="text-lg font-bold">Elegir ejercicio</h2>
+            <div className="flex items-center justify-between border-b border-border p-4">
+              <h2 className="text-lg font-semibold tracking-tight">
+                Elegir ejercicio
+              </h2>
               <button
                 onClick={() => setOpen(false)}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-900"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-2 text-muted active:bg-border"
                 aria-label="Cerrar"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
             <div className="relative p-4 pb-2">
               <Search
-                className="pointer-events-none absolute left-7 top-1/2 -translate-y-1/2 text-gray-500"
+                className="pointer-events-none absolute left-7 top-1/2 -translate-y-1/2 text-muted"
                 size={18}
               />
               <input
@@ -67,7 +69,7 @@ export default function AddExerciseToRoutine({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Buscar..."
-                className="min-h-[48px] w-full rounded-xl border border-gray-800 bg-gray-900 py-3 pl-9 pr-4 text-base outline-none focus:border-cyan-500"
+                className="min-h-[48px] w-full rounded-2xl border border-border bg-surface-2 py-3 pl-9 pr-4 text-base text-foreground outline-none transition-colors focus:border-accent/60 focus:ring-2 focus:ring-accent/20"
               />
             </div>
             <div className="flex-1 overflow-y-auto px-4 pb-4">
@@ -76,17 +78,17 @@ export default function AddExerciseToRoutine({
                   key={ex.id}
                   disabled={pending}
                   onClick={() => handleAdd(ex.id)}
-                  className="flex min-h-[56px] w-full items-center justify-between border-b border-gray-900 py-3 text-left disabled:opacity-50"
+                  className="flex min-h-[56px] w-full items-center justify-between border-b border-border/60 py-3 text-left transition-opacity disabled:opacity-50"
                 >
-                  <div>
-                    <p className="font-medium">{ex.name}</p>
-                    <p className="text-sm text-gray-500">{ex.category}</p>
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-foreground">{ex.name}</p>
+                    <p className="text-sm text-muted">{ex.category}</p>
                   </div>
-                  <Plus size={18} className="text-cyan-400" />
+                  <Plus size={18} className="shrink-0 text-accent" />
                 </button>
               ))}
               {filtered.length === 0 && (
-                <p className="py-8 text-center text-gray-500">
+                <p className="py-8 text-center text-sm text-muted">
                   Sin resultados.
                 </p>
               )}

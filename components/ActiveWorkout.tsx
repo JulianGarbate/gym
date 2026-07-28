@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import type { Exercise, WorkoutSet } from "@prisma/client";
-import { CheckCircle2, ChevronDown, Plus, Trash2 } from "lucide-react";
+import { CheckCircle2, ChevronDown, Flag, Plus, Trash2 } from "lucide-react";
 import { deleteSet, finishWorkout, logSet } from "@/app/actions/workouts";
 import RestTimer from "@/components/RestTimer";
 
@@ -65,46 +65,64 @@ export default function ActiveWorkout({
   }
 
   return (
-    <div className="px-4 py-4 space-y-4">
+    <div className="px-5 py-5 space-y-4">
       {exercises.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {exercises.map((ex) => (
-            <button
-              key={ex.id}
-              onClick={() => setActiveExerciseId(ex.id)}
-              className={`min-h-[44px] shrink-0 rounded-full px-4 text-sm font-medium ${
-                ex.id === activeExerciseId
-                  ? "bg-cyan-500 text-gray-950"
-                  : "bg-gray-900 border border-gray-800 text-gray-300"
-              }`}
-            >
-              {ex.name}
-            </button>
-          ))}
+        <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
+          {exercises.map((ex) => {
+            const done = loggedSets.some((s) => s.exerciseId === ex.id);
+            return (
+              <button
+                key={ex.id}
+                onClick={() => setActiveExerciseId(ex.id)}
+                className={`relative min-h-[42px] shrink-0 rounded-full px-4 text-sm font-medium transition-all ${
+                  ex.id === activeExerciseId
+                    ? "bg-accent text-accent-foreground"
+                    : "border border-border bg-surface text-muted"
+                }`}
+              >
+                {ex.name}
+                {done && ex.id !== activeExerciseId && (
+                  <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-accent" />
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
 
       <button
         onClick={() => setShowPicker(true)}
-        className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-dashed border-gray-700 text-sm font-medium text-gray-300 active:bg-gray-900"
+        className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border text-sm font-medium text-muted transition-colors active:bg-surface"
       >
-        <Plus size={18} />
+        <Plus size={17} />
         Agregar ejercicio a esta sesión
       </button>
 
       {activeExercise && (
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-4 space-y-3">
-          <h3 className="font-semibold">{activeExercise.name}</h3>
+        <div className="animate-fade-in space-y-4 rounded-3xl border border-border bg-surface p-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold tracking-tight text-foreground">
+              {activeExercise.name}
+            </h3>
+            {setsForActive.length > 0 && (
+              <span className="rounded-full bg-accent/10 px-2.5 py-1 text-xs font-semibold text-accent">
+                {setsForActive.length} serie{setsForActive.length !== 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
 
           {lastSet && (
-            <p className="text-sm text-gray-400">
-              Última vez: {lastSet.weight}kg × {lastSet.reps} reps
+            <p className="text-sm text-muted">
+              Última vez:{" "}
+              <span className="font-medium text-foreground">
+                {lastSet.weight}kg × {lastSet.reps}
+              </span>
             </p>
           )}
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2.5">
             <div>
-              <label className="mb-1 block text-xs text-gray-500">
+              <label className="mb-1.5 block text-center text-xs font-medium text-muted">
                 Peso (kg)
               </label>
               <input
@@ -113,29 +131,33 @@ export default function ActiveWorkout({
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
                 placeholder={lastSet ? String(lastSet.weight) : "0"}
-                className="min-h-[48px] w-full rounded-xl border border-gray-800 bg-gray-950 px-3 text-center text-lg outline-none focus:border-cyan-500"
+                className="min-h-[52px] w-full rounded-2xl border border-border bg-surface-2 px-2 text-center text-lg font-semibold text-foreground outline-none transition-colors focus:border-accent/60 focus:ring-2 focus:ring-accent/20"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs text-gray-500">Reps</label>
+              <label className="mb-1.5 block text-center text-xs font-medium text-muted">
+                Reps
+              </label>
               <input
                 type="number"
                 inputMode="numeric"
                 value={reps}
                 onChange={(e) => setReps(e.target.value)}
                 placeholder={lastSet ? String(lastSet.reps) : "0"}
-                className="min-h-[48px] w-full rounded-xl border border-gray-800 bg-gray-950 px-3 text-center text-lg outline-none focus:border-cyan-500"
+                className="min-h-[52px] w-full rounded-2xl border border-border bg-surface-2 px-2 text-center text-lg font-semibold text-foreground outline-none transition-colors focus:border-accent/60 focus:ring-2 focus:ring-accent/20"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs text-gray-500">RPE</label>
+              <label className="mb-1.5 block text-center text-xs font-medium text-muted">
+                RPE
+              </label>
               <input
                 type="number"
                 inputMode="decimal"
                 value={rpe}
                 onChange={(e) => setRpe(e.target.value)}
                 placeholder="-"
-                className="min-h-[48px] w-full rounded-xl border border-gray-800 bg-gray-950 px-3 text-center text-lg outline-none focus:border-cyan-500"
+                className="min-h-[52px] w-full rounded-2xl border border-border bg-surface-2 px-2 text-center text-lg font-semibold text-foreground outline-none transition-colors focus:border-accent/60 focus:ring-2 focus:ring-accent/20"
               />
             </div>
           </div>
@@ -143,30 +165,35 @@ export default function ActiveWorkout({
           <button
             onClick={handleLogSet}
             disabled={pending || !weight || !reps}
-            className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 font-semibold text-gray-950 active:bg-cyan-400 disabled:opacity-50"
+            className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-accent font-semibold text-accent-foreground transition-transform active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100"
           >
             <CheckCircle2 size={20} />
             Registrar serie
           </button>
 
           {setsForActive.length > 0 && (
-            <div className="space-y-1 pt-2">
+            <div className="space-y-1.5 pt-1">
               {setsForActive.map((s, i) => (
                 <div
                   key={s.id}
-                  className="flex items-center justify-between rounded-lg bg-gray-950 px-3 py-2 text-sm"
+                  className="flex items-center justify-between rounded-xl bg-surface-2 px-3.5 py-2.5 text-sm"
                 >
-                  <span>
-                    Serie {i + 1}: {s.weight}kg × {s.reps}
-                    {s.rpe ? ` · RPE ${s.rpe}` : ""}
+                  <span className="text-foreground">
+                    <span className="text-muted">Serie {i + 1}</span>{" "}
+                    <span className="font-medium">
+                      {s.weight}kg × {s.reps}
+                    </span>
+                    {s.rpe ? (
+                      <span className="text-muted"> · RPE {s.rpe}</span>
+                    ) : null}
                   </span>
                   <form action={deleteSet.bind(null, workoutId, s.id)}>
                     <button
                       type="submit"
-                      className="flex h-9 w-9 items-center justify-center rounded-full text-gray-500 active:bg-gray-800"
+                      className="flex h-8 w-8 items-center justify-center rounded-full text-muted active:bg-border"
                       aria-label="Eliminar serie"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={15} />
                     </button>
                   </form>
                 </div>
@@ -180,8 +207,9 @@ export default function ActiveWorkout({
         <form action={finishWorkout.bind(null, workoutId)}>
           <button
             type="submit"
-            className="min-h-[48px] w-full rounded-xl border border-gray-700 font-semibold text-gray-200 active:bg-gray-900"
+            className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl border border-border font-semibold text-foreground transition-colors active:bg-surface"
           >
+            <Flag size={17} />
             Finalizar entrenamiento
           </button>
         </form>
@@ -191,20 +219,22 @@ export default function ActiveWorkout({
 
       {showPicker && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 sm:items-center"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm sm:items-center"
           onClick={() => setShowPicker(false)}
         >
           <div
-            className="flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden rounded-t-2xl border border-gray-800 bg-gray-950 sm:rounded-2xl"
+            className="animate-fade-in flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden rounded-t-3xl border border-border bg-surface sm:rounded-3xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-gray-800 p-4">
-              <h2 className="text-lg font-bold">Elegir ejercicio</h2>
+            <div className="flex items-center justify-between border-b border-border p-4">
+              <h2 className="text-lg font-semibold tracking-tight">
+                Elegir ejercicio
+              </h2>
               <button
                 onClick={() => setShowPicker(false)}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-900"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-2 text-muted active:bg-border"
               >
-                <ChevronDown size={20} />
+                <ChevronDown size={18} />
               </button>
             </div>
             <div className="flex-1 overflow-y-auto px-4 pb-4">
@@ -212,13 +242,13 @@ export default function ActiveWorkout({
                 <button
                   key={ex.id}
                   onClick={() => addExerciseToSession(ex)}
-                  className="flex min-h-[56px] w-full items-center justify-between border-b border-gray-900 py-3 text-left"
+                  className="flex min-h-[56px] w-full items-center justify-between border-b border-border/60 py-3 text-left"
                 >
-                  <div>
-                    <p className="font-medium">{ex.name}</p>
-                    <p className="text-sm text-gray-500">{ex.category}</p>
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-foreground">{ex.name}</p>
+                    <p className="text-sm text-muted">{ex.category}</p>
                   </div>
-                  <Plus size={18} className="text-cyan-400" />
+                  <Plus size={18} className="shrink-0 text-accent" />
                 </button>
               ))}
             </div>
