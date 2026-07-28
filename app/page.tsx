@@ -16,7 +16,7 @@ export default async function Home() {
 
   return (
     <div>
-      <PageHeader title="Gym Tracker" subtitle={`Hola, ${user.name ?? "atleta"}`} />
+      <PageHeader title="Gym Tracker" />
       <div className="px-5 py-5 space-y-5">
         <Link
           href="/workout"
