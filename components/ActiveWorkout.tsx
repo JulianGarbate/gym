@@ -7,6 +7,7 @@ import {
   ChevronDown,
   Copy,
   Flag,
+  Info,
   Pencil,
   Plus,
   Trash2,
@@ -20,6 +21,7 @@ import {
   updateWorkoutNotes,
 } from "@/app/actions/workouts";
 import RestTimer from "@/components/RestTimer";
+import ExerciseDetailModal from "@/components/ExerciseDetailModal";
 
 type LoggedSet = WorkoutSet & { exercise: Exercise };
 
@@ -139,12 +141,20 @@ export default function ActiveWorkout({
 
       {activeExercise && (
         <div className="animate-fade-in space-y-4 rounded-3xl border border-border bg-surface p-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold tracking-tight text-foreground">
-              {activeExercise.name}
-            </h3>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-1.5">
+              <h3 className="truncate font-semibold tracking-tight text-foreground">
+                {activeExercise.name}
+              </h3>
+              <ExerciseDetailModal
+                exercise={activeExercise}
+                triggerClassName="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted active:bg-surface-2"
+                triggerLabel="Ver información del ejercicio"
+                trigger={<Info size={15} />}
+              />
+            </div>
             {setsForActive.length > 0 && (
-              <span className="rounded-full bg-accent/10 px-2.5 py-1 text-xs font-semibold text-accent">
+              <span className="shrink-0 rounded-full bg-accent/10 px-2.5 py-1 text-xs font-semibold text-accent">
                 {setsForActive.length} serie{setsForActive.length !== 1 ? "s" : ""}
               </span>
             )}

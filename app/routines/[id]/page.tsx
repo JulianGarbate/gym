@@ -7,7 +7,8 @@ import {
 } from "@/app/actions/routines";
 import AddExerciseToRoutine from "@/components/AddExerciseToRoutine";
 import StartWorkoutButton from "@/components/StartWorkoutButton";
-import { ChevronDown, ChevronUp, Copy, Trash2 } from "lucide-react";
+import ExerciseDetailModal from "@/components/ExerciseDetailModal";
+import { ChevronDown, ChevronUp, Copy, Info, Trash2 } from "lucide-react";
 
 export default async function RoutineDetailPage({
   params,
@@ -78,6 +79,12 @@ export default async function RoutineDetailPage({
                   : ""}
               </p>
             </div>
+            <ExerciseDetailModal
+              exercise={item.exercise}
+              triggerClassName="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-muted transition-colors active:bg-surface-2 active:text-foreground"
+              triggerLabel="Ver información del ejercicio"
+              trigger={<Info size={17} />}
+            />
             <div className="flex shrink-0 flex-col">
               <form action={moveRoutineItem.bind(null, routine.id, item.id, "up")}>
                 <button
