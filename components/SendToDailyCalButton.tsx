@@ -1,28 +1,62 @@
 "use client";
 
-import { useState } from "react";
-import { Send, Check } from "lucide-react";
+import { useState, useTransition } from "react";
+import { AlertTriangle, Check, Loader2, Send } from "lucide-react";
+import { sendCaloriesToDailyCal } from "@/app/actions/dailyCal";
 
 export default function SendToDailyCalButton({
   calories,
 }: {
   calories: number;
 }) {
-  const [sent, setSent] = useState(false);
+  const [status, setStatus] = useState<"idle" | "sent" | "error">("idle");
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  function handleClick() {
+    startTransition(async () => {
+      const result = await sendCaloriesToDailyCal(calories);
+      if (result.ok) {
+        setStatus("sent");
+      } else {
+        setStatus("error");
+        setError(result.error ?? "Error desconocido");
+      }
+    });
+  }
+
+  if (status === "sent") {
+    return (
+      <span className="flex h-11 shrink-0 items-center gap-1.5 rounded-full bg-surface-2 px-3.5 text-sm font-semibold text-muted">
+        <Check size={16} />
+        Enviado
+      </span>
+    );
+  }
 
   return (
     <button
-      onClick={() => setSent(true)}
-      disabled={sent}
-      title={`Envío a Daily Cal todavía no está conectado (${calories} kcal)`}
-      className={`flex h-11 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm font-semibold transition-colors ${
-        sent
-          ? "bg-surface-2 text-muted"
+      onClick={handleClick}
+      disabled={pending}
+      title={
+        status === "error"
+          ? error ?? "Error al enviar"
+          : `Enviar ${calories} kcal a Daily Cal`
+      }
+      className={`flex h-11 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm font-semibold transition-colors disabled:opacity-60 ${
+        status === "error"
+          ? "bg-red-500/15 text-red-400 active:scale-[0.97]"
           : "bg-accent text-accent-foreground active:scale-[0.97]"
       }`}
     >
-      {sent ? <Check size={16} /> : <Send size={16} />}
-      {sent ? "Listo" : "Daily Cal"}
+      {pending ? (
+        <Loader2 size={16} className="animate-spin" />
+      ) : status === "error" ? (
+        <AlertTriangle size={16} />
+      ) : (
+        <Send size={16} />
+      )}
+      {pending ? "Enviando..." : status === "error" ? "Reintentar" : "Daily Cal"}
     </button>
   );
 }
